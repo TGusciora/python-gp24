@@ -1,7 +1,9 @@
+datetime
 gp24package
 io
 itertools
 matplotlib==3.7.1
+numpy==1.24.4
 os
 pandas==2.0.3
 pickle
