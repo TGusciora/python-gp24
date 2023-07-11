@@ -10,6 +10,7 @@ pickle
 seaborn==0.12.2
 session_info==1.0.0
 sys==3.9.16|packagedbyconda-forge|(main,Feb12023,21:28:38)[MSCv.192964bit(AMD64)]
+ta
 time
 IPython==8.10.0
 jupyter_client==8.3.0
