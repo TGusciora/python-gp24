@@ -40,36 +40,48 @@ class DateFeatures:
         Imports file_name and returns as self.data pandas DataFrame.
     """
 
-    def __init__(self, data, variable):
+    def __init__(self, data_in, variable):
         """
         Constructor method
         """
-        self.data = data
+        self.data_in = data_in
         self.variable = variable
+        self.data_out = pd.DataFrame()
+        self.data_out = data_in.copy()
+        self._datetime()
+        self._dummy()
+        self._circle()
+
+    def output(self):
+        """
+        Generate transformed output.
+        """
+        return self.data_out
 
     def _datetime(self):
         """
         Creating monh & day variables from datetime variable.
         """
-        self.data["month"] = self.data[self.variable].dt.month
-        self.data["day"] = self.data[self.variable].dt.day
-        self.data["weekday"] = self.data[self.variable].dt.weekday
+        self.data_out["month"] = self.data_in[self.variable].dt.month
+        self.data_out["day"] = self.data_in[self.variable].dt.day
+        self.data_out["weekday"] = self.data_in[self.variable].dt.weekday
 
     def _dummy(self):
         """
         Creating dummy variables for months and days to inspect seasonality.
         """
-        pd.get_dummies(data=self.data["month"], prefix="month", prefix_sep="_")
-        pd.get_dummies(data=self.data["weekday"], prefix="weekday",
-                       prefix_sep="_")
+        pd.get_dummies(data=self.data_out["month"],
+                                       prefix="month", prefix_sep="_")
+        pd.get_dummies(data=self.data_out["weekday"],
+                                       prefix="weekday", prefix_sep="_")
+        self._datetime()  # restore month & weekday variables
 
     def _circle(self):
         """
         Feature engineering - representing datetime variables a cyclic
         coordinates. Creating sine and cosine representation.
         """
-        # Convert 'Month' and 'DayOfWeek' to cyclic coordinates
-        self.data['Month_sin'] = np.sin(2*np.pi*self.data['Month']/12)
-        self.data['Month_cos'] = np.cos(2*np.pi*self.data['Month']/12)
-        self.data['DayOfWeek_sin'] = np.sin(2*np.pi*self.data['DayOfWeek']/7)
-        self.data['DayOfWeek_cos'] = np.cos(2*np.pi*self.data['DayOfWeek']/7)
+        self.data_out['month_sin'] = np.sin(2*np.pi*self.data_out['month']/12)
+        self.data_out['month_cos'] = np.cos(2*np.pi*self.data_out['month']/12)
+        self.data_out['weekday_sin'] = np.sin(2*np.pi*self.data_out['weekday']/7)
+        self.data_out['weekday_cos'] = np.cos(2*np.pi*self.data_out['weekday']/7)
