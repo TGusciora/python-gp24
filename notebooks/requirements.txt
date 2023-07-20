@@ -7,8 +7,10 @@ numpy==1.24.4
 os
 pandas==2.0.3
 pickle
+scipy==1.11.1
 seaborn==0.12.2
 session_info==1.0.0
+sklearn==1.2.2
 sys==3.9.16|packagedbyconda-forge|(main,Feb12023,21:28:38)[MSCv.192964bit(AMD64)]
 ta
 time
