@@ -240,10 +240,6 @@ class VarDescriptiveStatistics:
         Returns transformed pandas DataFrame.
     """
 
-# list of days to iterate by
-# days = [3, 5, 30, 60, 90, 120, 240, 365]
-
-
     def __init__(self, data_in, days, var_name):
         """
         Constructor method.
@@ -252,6 +248,9 @@ class VarDescriptiveStatistics:
         self.days = days
         self.var_name = var_name
         self.res = {}  # results dictionary
+        self._combinations()
+        self._stats()
+        self._ratios()
 
     def output(self):
         """
@@ -264,7 +263,7 @@ class VarDescriptiveStatistics:
         """
         Creating combinations of days numbers.
         """
-        self.combinations = list(itertools.combinations_with_replacement(days, 2))
+        self.combinations = list(itertools.combinations_with_replacement(self.days, 2))
         self.combinations.sort()
 
     def _stats(self):
@@ -272,10 +271,10 @@ class VarDescriptiveStatistics:
         Creating descriptive statistics for numeric variables.
         """
         for i in self.days:
-            self.res[f'{self.var_name}_mean'] = self.data_in[self.var_name].rolling(i).mean()
-            self.res[f'{self.var_name}_stdev'] = self.data_in[self.var_name].rolling(i).std()
-            self.res[f'{self.var_name}_max'] = self.data_in[self.var_name].rolling(i).max()
-            self.res[f'{self.var_name}_min'] = self.data_in[self.var_name].rolling(i).min()
+            self.res[f'{self.var_name}_mean_{i}'] = self.data_in[self.var_name].rolling(i).mean()
+            self.res[f'{self.var_name}_stdev_{i}'] = self.data_in[self.var_name].rolling(i).std()
+            self.res[f'{self.var_name}_max_{i}'] = self.data_in[self.var_name].rolling(i).max()
+            self.res[f'{self.var_name}_min_{i}'] = self.data_in[self.var_name].rolling(i).min()
 
     def _ratios(self):
         """
@@ -284,41 +283,41 @@ class VarDescriptiveStatistics:
         for combo in self.combinations:
             d1, d2 = combo
             if d2 >= d1:
-                mean_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev'] != 0,
-                                            self.res[f'{self.var_name}_mean'] / self.res[f'{self.var_name}_stdev'],
+                mean_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev_{d2}'] != 0,
+                                            self.res[f'{self.var_name}_mean_{d1}'] / self.res[f'{self.var_name}_stdev_{d2}'],
                                             np.nan)
-                mean_max_ratio = np.where(self.res[f'{self.var_name}_max'] != 0,
-                                          self.res[f'{self.var_name}_mean'] / self.res[f'{self.var_name}_max'],
+                mean_max_ratio = np.where(self.res[f'{self.var_name}_max_{d2}'] != 0,
+                                          self.res[f'{self.var_name}_mean_{d1}'] / self.res[f'{self.var_name}_max_{d2}'],
                                           np.nan)
-                mean_min_ratio = np.where(self.res[f'{self.var_name}_min'] != 0,
-                                          self.res[f'{self.var_name}_mean'] / self.res[f'{self.var_name}_min'],
+                mean_min_ratio = np.where(self.res[f'{self.var_name}_min_{d2}'] != 0,
+                                          self.res[f'{self.var_name}_mean_{d1}'] / self.res[f'{self.var_name}_min_{d2}'],
                                           np.nan)
-                stdev_mean_ratio = np.where(self.res[f'{self.var_name}_mean'] != 0,
-                                            self.res[f'{self.var_name}_stdev'] / self.res[f'{self.var_name}_mean'],
+                stdev_mean_ratio = np.where(self.res[f'{self.var_name}_mean_{d2}'] != 0,
+                                            self.res[f'{self.var_name}_stdev_{d1}'] / self.res[f'{self.var_name}_mean_{d2}'],
                                             np.nan)
-                stdev_max_ratio = np.where(self.res[f'{self.var_name}_max'] != 0,
-                                           self.res[f'{self.var_name}_stdev'] / self.res[f'{self.var_name}_max'],
+                stdev_max_ratio = np.where(self.res[f'{self.var_name}_max_{d2}'] != 0,
+                                           self.res[f'{self.var_name}_stdev_{d1}'] / self.res[f'{self.var_name}_max_{d2}'],
                                            np.nan)
-                stdev_min_ratio = np.where(self.res[f'{self.var_name}_min'] != 0,
-                                           self.res[f'{self.var_name}_stdev'] / self.res[f'{self.var_name}_min'],
+                stdev_min_ratio = np.where(self.res[f'{self.var_name}_min_{d2}'] != 0,
+                                           self.res[f'{self.var_name}_stdev_{d1}'] / self.res[f'{self.var_name}_min_{d2}'],
                                            np.nan)
-                max_mean_ratio = np.where(self.res[f'{self.var_name}_mean'] != 0,
-                                         self.res[f'{self.var_name}_max'] / self.res[f'{self.var_name}_mean'],
+                max_mean_ratio = np.where(self.res[f'{self.var_name}_mean_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_max_{d1}'] / self.res[f'{self.var_name}_mean_{d2}'],
                                          np.nan)
-                max_min_ratio = np.where(self.res[f'{self.var_name}_min'] != 0,
-                                         self.res[f'{self.var_name}_max'] / self.res[f'{self.var_name}_min'],
+                max_min_ratio = np.where(self.res[f'{self.var_name}_min_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_max_{d1}'] / self.res[f'{self.var_name}_min_{d2}'],
                                          np.nan)
-                max_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev'] != 0,
-                                         self.res[f'{self.var_name}_max'] / self.res[f'{self.var_name}_stdev'],
+                max_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_max_{d1}'] / self.res[f'{self.var_name}_stdev_{d2}'],
                                          np.nan)
-                min_mean_ratio = np.where(self.res[f'{self.var_name}_mean'] != 0,
-                                         self.res[f'{self.var_name}_min'] / self.res[f'{self.var_name}_mean'],
+                min_mean_ratio = np.where(self.res[f'{self.var_name}_mean_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_min_{d1}'] / self.res[f'{self.var_name}_mean_{d2}'],
                                          np.nan)
-                min_max_ratio = np.where(self.res[f'{self.var_name}_max'] != 0,
-                                         self.res[f'{self.var_name}_min'] / self.res[f'{self.var_name}_max'],
+                min_max_ratio = np.where(self.res[f'{self.var_name}_max_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_min_{d1}'] / self.res[f'{self.var_name}_max_{d2}'],
                                          np.nan)
-                min_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev'] != 0,
-                                         self.res[f'{self.var_name}_min'] / self.res[f'{self.var_name}_stdev'],
+                min_stdev_ratio = np.where(self.res[f'{self.var_name}_stdev_{d2}'] != 0,
+                                         self.res[f'{self.var_name}_min_{d1}'] / self.res[f'{self.var_name}_stdev_{d2}'],
                                          np.nan)
 
                 # assign to dictionary
@@ -334,7 +333,7 @@ class VarDescriptiveStatistics:
                 self.res[f'{self.var_name}_min_{d1}_mean_{d2}_ratio'] = min_mean_ratio
                 self.res[f'{self.var_name}_min_{d1}_stdev_{d2}_ratio'] = min_stdev_ratio
                 self.res[f'{self.var_name}_min_{d1}_max_{d2}_ratio'] = min_max_ratio
- 
+
                 if d2 > d1:
                     # calculate variable value
                     mean_ratio = np.where(self.res[f'{self.var_name}_mean_{d2}'] != 0,
@@ -354,9 +353,4 @@ class VarDescriptiveStatistics:
                     self.res[f'{self.var_name}_stdev_{d1}_stdev_{d2}_ratio'] = stdev_ratio
                     self.res[f'{self.var_name}_max_{d1}_max_{d2}_ratio'] = max_ratio
                     self.res[f'{self.var_name}_min_{d1}_min_{d2}_ratio'] = min_ratio
-
-
-
-results = results.shift(periods=1)
-print(results.shape)
-results.head(15)
+        return self.res
