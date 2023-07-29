@@ -199,7 +199,7 @@ class VarDescriptiveStatistics:
     Class creating new features from variable using descriptive statistics.
 
     Takes numeric variable and provides based on given list of days - mean,
-    standard deviation, maximum and minimum values over last X days (where 
+    standard deviation, maximum and minimum values over last X days (where
     X is a given number from list of days). Furthermore creates ratios between
     calculated variables (for example ratio of last X days mean to last Y days
     mean).
@@ -230,7 +230,7 @@ class VarDescriptiveStatistics:
     -------
     __init__(self, file_name)
         Constructor method.
-    _datetime(self)
+    _comibnations(self)
         Creates datetime variables.
     _dummy(self)
         Creates dummy variables for months and days to inspect seasonality.
@@ -255,20 +255,32 @@ class VarDescriptiveStatistics:
     def output(self):
         """
         Generate transformed output.
+
+        Converts res dictionary to results pandas DataFrame. Returns
+        DataFrame without original variables from data_in.
         """
         self.results = pd.DataFrame(self.res)
+
+        # Shifting 1 observation, because we don't want to use current
+        # observation target information for calculation (data leak).
+        self.results = self.results.shift(periods=1)
         return self.results
 
     def _combinations(self):
         """
         Creating combinations of days numbers.
+
+        Using combinations with replacement on sorted list of days.
         """
+        self.days.sort()
         self.combinations = list(itertools.combinations_with_replacement(self.days, 2))
-        self.combinations.sort()
 
     def _stats(self):
         """
         Creating descriptive statistics for numeric variables.
+
+        For each day from days list creates last X days mean, stdev, max and
+        min.
         """
         for i in self.days:
             self.res[f'{self.var_name}_mean_{i}'] = self.data_in[self.var_name].rolling(i).mean()
@@ -278,7 +290,11 @@ class VarDescriptiveStatistics:
 
     def _ratios(self):
         """
-        Creating ratios between calculated variables
+        Creating ratios between calculated variables.
+
+        For each descriptive statistic from _stats function creates a ratio
+        between variables. Creates ratio only for same var_name variable
+        transformation.
         """
         for combo in self.combinations:
             d1, d2 = combo
