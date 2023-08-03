@@ -212,6 +212,9 @@ class VarDescriptiveStatistics:
         Name of list storing days numbers for calculating features and ratios.
     var_name : str
         Name of base variable for feature engineering.
+    shift : int, default 1
+        Indicator if output needs to be shifted before return (calculated 
+        values moved 1 observations forward)
 
     Attributes
     ----------
@@ -240,13 +243,14 @@ class VarDescriptiveStatistics:
         Returns transformed pandas DataFrame.
     """
 
-    def __init__(self, data_in, days, var_name):
+    def __init__(self, data_in, days, var_name, shift = 1):
         """
         Constructor method.
         """
         self.data_in = data_in
         self.days = days
         self.var_name = var_name
+        self.shift = shift
         self.res = {}  # results dictionary
         self._combinations()
         self._stats()
@@ -261,9 +265,10 @@ class VarDescriptiveStatistics:
         """
         self.results = pd.DataFrame(self.res)
 
-        # Shifting 1 observation, because we don't want to use current
-        # observation target information for calculation (data leak).
-        self.results = self.results.shift(periods=1)
+        if self.shift == 1:
+            # Shifting 1 observation, because we don't want to use current
+            # observation target information for calculation (data leak).
+            self.results = self.results.shift(periods=1)
         return self.results
 
     def _combinations(self):
